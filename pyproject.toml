@@ -1,0 +1,26 @@
+[project]
+name = "intelligent-pharma-context-engine"
+version = "0.1.0"
+description = "End-to-end prototype for ingesting pharmaceutical packaging photos and extracting structured metadata."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "opencv-python-headless>=4.10.0",
+    "pytesseract>=0.3.10",
+    "numpy>=1.26.0",
+    "pillow>=10.0.0",
+    "python-dotenv>=1.0.0",
+    "requests>=2.31.0",
+    "rapidfuzz>=3.0.0",
+    "google-generativeai>=0.3.0",
+    "pydantic>=2.0.0",
+    "ipykernel>=6.0.0",  # For Jupyter notebooks
+    "matplotlib>=3.8.0", # For visualization
+]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.0.0",
+    "black>=24.0.0",
+    "ruff>=0.1.0",
+]
