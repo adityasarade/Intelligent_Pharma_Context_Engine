@@ -2,6 +2,7 @@ import os
 import google.generativeai as genai
 from dotenv import load_dotenv
 import json
+import time
 from typing import Dict, Any, Optional
 import logging
 
@@ -30,8 +31,28 @@ class EnrichmentEngine:
             raise ValueError("GEMINI_API_KEY is missing.")
         
         genai.configure(api_key=self.api_key)
-        self.model = genai.GenerativeModel('gemini-pro') 
+        self.model_name = 'gemini-2.0-flash'
+        self.model = genai.GenerativeModel(self.model_name) 
         self.kb = KnowledgeBase()
+
+    def _call_llm_with_retry(self, prompt: str, max_retries: int = 3) -> Optional[str]:
+        """
+        Helper to call LLM with retry logic for rate limits (429).
+        """
+        for attempt in range(max_retries):
+            try:
+                response = self.model.generate_content(prompt)
+                return response.text
+            except Exception as e:
+                error_str = str(e)
+                if "429" in error_str or "quota" in error_str.lower():
+                    logger.warning(f"Rate limit hit. Retrying in {(attempt + 1) * 5} seconds...")
+                    time.sleep((attempt + 1) * 5)
+                else:
+                    logger.error(f"LLM call failed: {e}")
+                    return None
+        logger.error("Max retries exceeded for LLM call.")
+        return None
 
     def _extract_entities_with_llm(self, text: str) -> EntityExtraction:
         """
@@ -62,20 +83,22 @@ class EnrichmentEngine:
         {text}
         """
         
+        content = self._call_llm_with_retry(prompt)
+        if not content:
+            return EntityExtraction()
+
+        # Simple cleanup to ensure JSON parsing
+        content = content.strip()
+        if content.startswith("```json"):
+            content = content[7:-3]
+        elif content.startswith("```"):
+            content = content[3:-3]
+        
         try:
-            response = self.model.generate_content(prompt)
-            # Simple cleanup to ensure JSON parsing - usage of json_mode would be better if available/wrapped
-            # but for now text parsing is fine.
-            content = response.text.strip()
-            if content.startswith("```json"):
-                content = content[7:-3]
-            elif content.startswith("```"):
-                content = content[3:-3]
-            
             data = json.loads(content)
             return EntityExtraction(**data)
-        except Exception as e:
-            logger.error(f"LLM Extraction failed: {e}")
+        except json.JSONDecodeError:
+            logger.error(f"LLM JSON Parse Error. Content: {content}")
             return EntityExtraction()
 
     def _generate_clinical_context(self, drug_name: str, verified_info: Dict) -> ClinicalContext:
@@ -83,9 +106,6 @@ class EnrichmentEngine:
         Generates clinical context (indications, etc.) using Gemini, 
         grounded by the verified drug name.
         """
-        # We can perform RAG here if we had local docs, but for now we rely on the LLM's knowledge 
-        # plus the instructions to be accurate.
-        
         prompt = f"""
         Provide a brief, professional clinical summary for the drug: "{drug_name}".
         
@@ -106,18 +126,21 @@ class EnrichmentEngine:
         Strictly adhere to medical facts. If unsure, return empty lists.
         """
         
+        content = self._call_llm_with_retry(prompt)
+        if not content:
+            return ClinicalContext()
+
+        content = content.strip()
+        if content.startswith("```json"):
+            content = content[7:-3]
+        elif content.startswith("```"):
+            content = content[3:-3]
+            
         try:
-            response = self.model.generate_content(prompt)
-            content = response.text.strip()
-            if content.startswith("```json"):
-                content = content[7:-3]
-            elif content.startswith("```"):
-                content = content[3:-3]
-                
             data = json.loads(content)
             return ClinicalContext(**data)
-        except Exception as e:
-            logger.error(f"LLM Enrichment failed: {e}")
+        except json.JSONDecodeError:
+            logger.error(f"LLM JSON Parse Error (Enrichment). Content: {content}")
             return ClinicalContext()
 
     def enrich_text(self, raw_text: str) -> PharmaContextOutput:
@@ -185,7 +208,7 @@ class EnrichmentEngine:
             provenance={
                 "search_term_used": search_term,
                 "verified_name_used": final_drug_name,
-                "llm_model": "gemini-pro"
+                "llm_model": self.model_name
             }
         )
 
