@@ -1,0 +1,66 @@
+{
+  "image_id": "IMG_954BE438",
+  "source_image_path": "C:\\Users\\Aditya\\OneDrive\\Desktop\\HealthInfinityAI\\data\\raw\\medicine bottle.v1i.yolov12\\test\\images\\110_png.rf.0d99aa069a7604451da06cc6f49e9534.jpg",
+  "capture_datetime": "2026-01-28T23:36:39.281721",
+  "stage1": {
+    "ocr_chunks": [],
+    "raw_text": "eee nN\n:\nPee\n\"<\nSe ea",
+    "barcodes": []
+  },
+  "extracted_entities": {
+    "drug_name": null,
+    "generic_name": null,
+    "manufacturer": null,
+    "composition": null,
+    "strength": null,
+    "dosage_form": null,
+    "batch_lot": null,
+    "expiry_date": null,
+    "ndc": null
+  },
+  "verification": {
+    "candidate_fields": {},
+    "openfda": {
+      "is_found": false,
+      "application_number": null,
+      "brand_name": null,
+      "generic_name": null,
+      "manufacturer_name": null,
+      "product_ndc": null,
+      "labeler_name": null
+    },
+    "rxnorm": {
+      "is_found": false,
+      "rxcui": null,
+      "name": null,
+      "synonym": null,
+      "tty": null
+    },
+    "barcode_validation": null,
+    "confidence_score": 0.0,
+    "match_method": [],
+    "human_review_needed": true,
+    "review_hint": "No drug name extracted from OCR"
+  },
+  "clinical_enrichment": {
+    "indications": [],
+    "contraindications": [],
+    "warnings": [],
+    "side_effects": [],
+    "storage": null,
+    "human_summary": null
+  },
+  "provenance": {
+    "openfda_query": null,
+    "openfda_fetch_datetime": null,
+    "rxnorm_query": null,
+    "rxnorm_fetch_datetime": null,
+    "llm_model": "gemini-2.0-flash",
+    "llm_call_datetime": "2026-01-28T23:36:39.277688"
+  },
+  "metrics": {
+    "cer": null,
+    "entity_match_rate": null,
+    "processing_time_ms": 36077.486515045166
+  }
+}

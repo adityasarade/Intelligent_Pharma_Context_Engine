@@ -23,6 +23,11 @@ try:
     PYZBAR_AVAILABLE = True
 except ImportError:
     logger.warning("pyzbar not available. Install with: pip install pyzbar")
+except (OSError, FileNotFoundError) as e:
+    logger.warning(
+        f"pyzbar native library (libzbar) not found: {e}. "
+        "On Windows, install Visual C++ Redistributable and zbar library."
+    )
 
 try:
     from pylibdmtx import pylibdmtx
@@ -31,6 +36,11 @@ try:
 except ImportError:
     logger.warning(
         "pylibdmtx not available. Install with: pip install pylibdmtx"
+    )
+except (OSError, FileNotFoundError) as e:
+    logger.warning(
+        f"pylibdmtx native library not found: {e}. "
+        "On Windows, install libdmtx library."
     )
 
 
