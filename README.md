@@ -1,32 +1,69 @@
 # Intelligent Pharma-Context Engine
 
-An end-to-end prototype that ingests photos of pharmaceutical packaging (bottles, blister strips), extracts structured metadata, verifies against authoritative sources (openFDA, RxNorm), and enriches the record with clinical data.
+An end-to-end prototype for ingesting pharmaceutical packaging photos, extracting text via OCR, and enriching it with authoritative medical data (OpenFDA, RxNorm) and LLM-generated clinical summaries (Gemini).
 
-**STATUS**: Pre-Alpha / Planning Phase
+## Features
+- **Stage 1 (Detection)**: Robust image preprocessing (CLAHE, Bilateral Filter) and Tesseract OCR.
+- **Stage 2 (Verification)**: Cross-references drug names with RxNorm and OpenFDA APIs.
+- **Stage 3 (Enrichment)**: Uses Google Gemini (2.0 Flash) to extract structured entities and generate clinical context.
+- **Resilience**: Handles API rate limits and OCR errors gracefully.
 
 ## Setup
 
-1.  **Prerequisites**: Python 3.9+, `uv` (recommended).
-2.  **Installation**:
-    ```bash
-    uv sync
-    ```
-3.  **Configuration**:
-    - Copy `.env.example` to `.env` and fill in your `GEMINI_API_KEY`.
-    - Ensure Tesseract OCR is installed on your system and accessible via PATH.
+### Prerequisites
+- Python 3.9+
+- Tesseract OCR installed and in PATH (or configured in `.env`).
 
-## Project Structure
+### Installation
+1. Clone the repository.
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   # OR using uv
+   uv pip install -r pyproject.toml
+   ```
+   *Note: If you encounter `ModuleNotFoundError: No module named 'cv2'`, run `pip install opencv-python-headless`.*
 
-- `src/`: Source code for the pipeline.
-- `data/`: Dataset storage (excluded from git).
-- `notebooks/`: Exploratory analysis.
-- `docs/`: Documentation and periodic reports.
+3. Set up environment variables:
+   Create a `.env` file in the root directory:
+   ```ini
+   GEMINI_API_KEY=your_api_key_here
+   # TESSERACT_CMD=C:\Program Files\Tesseract-OCR\tesseract.exe (Optional if in PATH)
+   ```
 
-## Datasets
+## Usage
 
-This project uses the following public datasets (please download and place in `data/raw/`):
-- [Medicine Bottle Dataset](https://universe.roboflow.com/project-ko6pf/medicine-bottle)
-- [Pills Inside Bottles](https://huggingface.co/datasets/gwenxin/pills_inside_bottles)
+### CLI
+Process a single image:
+```bash
+python cli.py process path/to/image.jpg --output result.json
+```
 
-## License
-MIT
+### Library
+```python
+from src.main import PharmaContextPipeline
+
+pipeline = PharmaContextPipeline()
+result = pipeline.process_image("data/test/sample.jpg")
+print(result.model_dump_json(indent=2))
+```
+
+## Structure
+- `src/preprocessing.py`: Image enhancement pipeline.
+- `src/ocr.py`: Tesseract wrapper.
+- `src/knowledge.py`: Clients for OpenFDA and RxNorm.
+- `src/enrichment.py`: Gemini LLM logic.
+- `src/main.py`: Main orchestration.
+- `src/eval.py`: Evaluation metrics (CER, EMR).
+
+## Evaluation
+Run the evaluation script to see metrics usage:
+```bash
+python src/eval.py
+```
+See `docs/performance_report.md` for detailed results.
+
+## Status
+- **Day 1**: ✅ OCR Verified.
+- **Day 2**: ✅ Enrichment & Knowledge Base Verified.
+- **Day 3**: ✅ CLI & Pipeline Integration Complete.
