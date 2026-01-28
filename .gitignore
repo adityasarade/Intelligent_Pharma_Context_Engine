@@ -60,3 +60,4 @@ uv.lock
 docs/
 .claude/
 .pytest_cache/
+task.txt
