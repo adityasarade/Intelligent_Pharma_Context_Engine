@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  pharma-context:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    volumes:
+      - ../data:/app/data:ro
+      - ../output:/app/output
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    command: python cli.py process /app/data/test/sample.jpg -o /app/output/result.json

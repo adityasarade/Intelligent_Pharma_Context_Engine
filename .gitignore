@@ -58,3 +58,5 @@ output/
 uv.lock
 
 docs/
+.claude/
+.pytest_cache/

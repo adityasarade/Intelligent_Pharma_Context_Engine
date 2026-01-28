@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "End-to-end prototype for ingesting pharmaceutical packaging photos and extracting structured metadata."
 readme = "README.md"
 requires-python = ">=3.9"
+license = {text = "MIT"}
 dependencies = [
     "opencv-python-headless>=4.10.0",
     "pytesseract>=0.3.10",
@@ -15,13 +16,33 @@ dependencies = [
     "google-generativeai>=0.3.0",
     "huggingface_hub>=0.20.0",
     "pydantic>=2.0.0",
-    "ipykernel>=6.0.0",  # For Jupyter notebooks
-    "matplotlib>=3.8.0", # For visualization
+    "ipykernel>=6.0.0",
+    "matplotlib>=3.8.0",
 ]
+
+[project.scripts]
+pharma-context = "cli:main"
 
 [tool.uv]
 dev-dependencies = [
     "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
     "black>=24.0.0",
     "ruff>=0.1.0",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+markers = [
+    "integration: marks tests as integration tests (deselect with '-m \"not integration\"')",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+
+[tool.black]
+line-length = 88
+target-version = ["py39"]
